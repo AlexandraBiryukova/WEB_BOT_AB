@@ -20,6 +20,10 @@ def starting(message):
 	bot.send_message(message.chat.id,START%(message.chat.first_name), reply_markup=markup)
 	file.close()
 
+@bot.message_handler(func=lambda message: message.text == "Cancel")
+def cancel(message):
+	bot.send_message(message.chat.id,"Choose command:", reply_markup=markup)
+
 @bot.message_handler(func=lambda message: message.text == "New event")
 def add_day(message):
 	week= types.InlineKeyboardMarkup()
@@ -59,6 +63,8 @@ def delete_event(message):
 		if(s2[i]!=''):
 			name=i+1
 			dele.row(types.InlineKeyboardButton('DEL::'+s2[i]))
+	dele.row(types.InlineKeyboardButton('Cancel'))
+
 	bot.send_message(message.chat.id,s1+DELETE, reply_markup=dele)
 
 @bot.message_handler(func=lambda message: 'DEL::' in message.text  )
