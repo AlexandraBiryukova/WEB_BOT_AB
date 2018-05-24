@@ -4,6 +4,7 @@ import telebot
 from telebot import types
 import requests
 import os
+import os.path
 bot = telebot.TeleBot(TOKEN)
 markup= types.ReplyKeyboardMarkup(row_width=2,one_time_keyboard=True)
 first=types.KeyboardButton('New event')
@@ -34,12 +35,14 @@ def add_day(message):
 @bot.message_handler(func=lambda message: message.text == "Show events")
 def show_event(message):
 	bot.send_message(message.chat.id,SHOW)
-	file=open("users/%s.txt"%message.chat.id,"r")
-	s=file.read()
-	if s.isspace()==False:
-		bot.send_message(message.chat.id, s)
-	else:bot.send_message(message.chat.id, NONE)
-	file.close()
+	if os.path.exists("users/%s.txt"%message.chat.id):
+		file=open("users/%s.txt"%message.chat.id,"r")
+		s=file.read()
+		if s.isspace()==False:
+			bot.send_message(message.chat.id, s)
+		else:bot.send_message(message.chat.id, NONE)
+		file.close()
+	else :bot.send_message(message.chat.id, NONE)
 
 @bot.callback_query_handler(func=lambda c:True)
 def save_day(c):
@@ -76,6 +79,18 @@ def ddd(message):
 	s3=s3.replace(message.text.split('::')[1],'')
 	file.write(s3)
 	file.close()
+	file = open("users/%s.txt"%message.chat.id,"r")
+	s=file.read()
+	file.close()
+	s=s.split('\n')
+	res=[]
+	for i in range(len(s)):
+		if(s[i]!=''):
+			res.append(s[i])
+	res='\n'.join(res)+'\n'
+	file = open("users/%s.txt"%message.chat.id,"w")
+	file.write(res)
+	file.close()
 	bot.send_message(message.chat.id,DELETE2,reply_markup=markup)
 	
 @bot.message_handler(func=lambda message: 'T:' in message.text )
@@ -96,7 +111,11 @@ def adding_action(message):
 	file.write(message.text.split('-')[1]+'\n')
 	file.close()
 	bot.send_message(message.chat.id,SAVE,reply_markup=markup)
-		
+
+@bot.message_handler(content_types='text')
+def handle_text_doc(message):
+	bot.send_message(message.chat.id,"Oooops,something wrong, I can not understand you.",reply_markup=markup)
+	
 		
 	
 if __name__ =='__main__':
